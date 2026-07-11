@@ -1,5 +1,5 @@
 # Sistema-para-mapeo-de-interiores-y-asistencia-en-la-navegacion-mediante-TurtleBot-4-TFG
-# Estructura del repositorio
+## Estructura del repositorio
 ### `turtlebot4_guidance_system`
 
 Paquete principal del proyecto. Implementa el sistema de guiado autónomo y contiene:
@@ -36,9 +36,9 @@ Directorio con algunas configuraciones sobre el TurtleBot 4 Lite real y códigos
 - Mapas realizados mediante SLAM de localizaciones reales.
 
 ---
-# Preparación del entorno y ejecución de la simulación
+## Preparación del entorno y ejecución de la simulación
 
-## Requisitos previos
+### Requisitos previos
 
 Antes de ejecutar el sistema es necesario disponer de:
 
@@ -56,7 +56,7 @@ Estas restricciones de versión son necesarias para evitar problemas de compatib
 
 ---
 
-## Compilación del proyecto
+### Compilación del proyecto
 
 Tras clonar el repositorio, es necesario compilar los paquetes ROS2:
 
@@ -68,7 +68,7 @@ turtlebot4_guidance_system \
 yolobot \
 --symlink-install
 ```
-## Preparación del entorno ROS 2
+### Preparación del entorno ROS 2
 
 Es necesario añadir las siguientes líneas al archivo `~/.bashrc`:
 ```bash
@@ -88,15 +88,15 @@ source ~/ros2_ws/install/setup.bash
 ```
 ---
 
-## Ejecución completa
+### Ejecución completa
 
-### Terminal 1
+#### Terminal 1
 
 ```bash
 ros2 run rmw_zenoh_cpp rmw_zenohd
 ```
 
-### Terminal 2
+#### Terminal 2
 
 ```bash
 ros2 launch turtlebot4_guidance_system sistema_guiado.launch.py
