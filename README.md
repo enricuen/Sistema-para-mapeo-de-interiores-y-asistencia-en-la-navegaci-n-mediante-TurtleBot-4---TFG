@@ -1,6 +1,6 @@
 # Sistema-para-mapeo-de-interiores-y-asistencia-en-la-navegacion-mediante-TurtleBot-4-TFG
 
-# Preparación del entorno y ejecución
+# Preparación del entorno y ejecución de la simulación
 
 ## Requisitos previos
 
