@@ -58,7 +58,7 @@ class RobotCommander(Node):
         self.initial_pose_received = False
         self.is_docked = None
 
-        # Callback que usa la GUI para el registro.
+        # Callback que usa la GUI para el registro
         self.status_callback = None
 
         # ROS2 subscribers
@@ -84,8 +84,7 @@ class RobotCommander(Node):
         super().destroy_node()     
 
     def _call_trigger(self, client, service_name: str):
-        #
-        """Llama a un servicio Trigger genérico y devuelve la respuesta (o None si falla)."""
+        # Lamada a servicio Trigger 
         while not client.wait_for_service(timeout_sec=1.0):
             self.info(f"Servicio '{service_name}' no disponible, esperando...")
         future = client.call_async(Trigger.Request())
@@ -93,7 +92,7 @@ class RobotCommander(Node):
         return future.result()
 
     def enable_door_detection(self):
-        """Activa la detección YOLO. Se llama al llegar al punto de entrada."""
+        # Activación de la detección con YOLO
         self.info("Activando detección YOLO en el punto de entrada...")
         result = self._call_trigger(self.yolo_enable_client, '/yolo/enable_detection')
         if result is None:
@@ -102,7 +101,7 @@ class RobotCommander(Node):
             self.info(f"Respuesta: {result.message}")
 
     def disable_door_detection(self):
-        """Desactiva la detección YOLO para liberar cómputo fuera del punto de entrada."""
+        # Desactivación de la detección con YOLO
         result = self._call_trigger(self.yolo_disable_client, '/yolo/disable_detection')
         if result is None:
             self.warn("Fallo al desactivar la detección YOLO (se continúa de todos modos).")
@@ -110,23 +109,23 @@ class RobotCommander(Node):
             self.info(f"Respuesta: {result.message}")
 
     def check_door_vision(self, wait_time: float = 3.0) -> bool:
-        """Activa la detección YOLO, espera a tener frames limpios y consulta el resultado."""
-        # 1. Activar la detección justo ahora, que el robot ya está en el punto de entrada
+        # Activa la detección , espera a tener frames estables y devuelve respuesta
+        # Activación de la detección porque el robot está en el punto de entrada
         self.enable_door_detection()
 
-        # 2. Esperar a que se procesen frames limpios con la cámara ya estabilizada
+        # El robot se espera para que se estabilice la cámara 
         self.info(f"Robot detenido. Esperando {wait_time} segundos para estabilizar la cámara y procesar frames limpios...")
         time.sleep(wait_time)
 
-        # 3. Consultar el resultado acumulado
+        # Resultado final del estado de la puerta
         self.info("Analizando puerta con la cámara...")
         result = self._call_trigger(self.yolo_check_client, '/yolo/check_door')
 
-        # 4. Detección ya no es necesaria hasta el próximo punto de entrada
+        # Desactivación de la detección
         self.disable_door_detection()
 
         if result is not None:
-            # Asumimos: success=True es "Vía libre / No hay señal", success=False es "Señal detectada"
+            # success=True es "Vía libre / No hay señal", success=False es "Señal detectada"
             self.info(f"Respuesta de YOLO: {result.message}")
             return result.success
         else:
@@ -364,7 +363,7 @@ def make_pose(rc: RobotCommander, x: float, y: float, yaw: float) -> PoseStamped
     return pose
 
 def get_home_pose(rc: RobotCommander) -> PoseStamped:
-    """Pose de origen del robot, usada como punto de retorno tras cada navegación."""
+    # pose inicial del robot usada para volver a la base en cada ejecución
     return make_pose(rc, INITIAL_POSE['x'], INITIAL_POSE['y'], INITIAL_POSE['yaw'])
 
 
@@ -372,7 +371,7 @@ def define_goal_poses(rc: RobotCommander) -> dict:
 
     goals = {}
 
-    # ---Aula 1---
+    # Aula 1
     goals[1] = {
         'name': 'Aula 1',
         # Punto de entrada: delante de la puerta del Aula 1
@@ -384,7 +383,7 @@ def define_goal_poses(rc: RobotCommander) -> dict:
     }
 
 
-    # --- Aula 2 ---
+    # Aula 2
     goals[2] = {
         'name': 'Aula 2',
         'entry_point':    make_pose(rc, -3.25, 0.70, -1.57),
@@ -392,7 +391,7 @@ def define_goal_poses(rc: RobotCommander) -> dict:
         'fallback_point': make_pose(rc,  11.75,  0.15,  0.0),
     }
 
-    # --- Aula 3 ---
+    # Aula 3
     goals[3] = {
         'name': 'Aula 3',
         'entry_point':    make_pose(rc,  4.43,  -0.32,  1.57),
@@ -400,7 +399,7 @@ def define_goal_poses(rc: RobotCommander) -> dict:
         'fallback_point': make_pose(rc,  11.75,  0.15,  0.0),
     }
 
-    # --- Aula 4 ---
+    # Aula 4
     goals[4] = {
         'name': 'Aula 4',
         'entry_point':    make_pose(rc,  4.50, 0.90,  -1.57),
@@ -424,7 +423,7 @@ def navigate_and_wait(rc: RobotCommander, pose: PoseStamped, description: str) -
     return rc.getResult()
 
 def return_home(rc: RobotCommander, home_pose: PoseStamped, status_queue: "queue.Queue"):
-    """Navega de vuelta al punto inicial y reporta el resultado a la GUI."""
+    # Navegación de vuelta a la base y reporte de estado para la interfaz
     status_queue.put(('state', 'busy', "Volviendo al punto inicial..."))
     result = navigate_and_wait(rc, home_pose, "punto inicial")
 
@@ -443,8 +442,8 @@ def return_home(rc: RobotCommander, home_pose: PoseStamped, status_queue: "queue
 
 
 def run_navigation_cycle(rc: RobotCommander, aula: dict, aula_name: str, home_pose: PoseStamped, status_queue: "queue.Queue"):
-    """Ejecuta un ciclo completo (ir al punto de entrada, comprobar puerta,
-    entrar o ir al punto alternativo) y reporta el progreso a la GUI."""
+    # Ejecución de un ciclo completo de ir al punto de entrada, comprobar el estado de la puerta y entrar o ir al punto alternativo
+
     status_queue.put(('state', 'busy', f"Navegando al punto de entrada de {aula_name}..."))
     result = navigate_and_wait(rc, aula['entry_point'], f"punto de entrada {aula_name}")
 
@@ -496,27 +495,25 @@ def run_navigation_cycle(rc: RobotCommander, aula: dict, aula_name: str, home_po
 
 
 def ros_worker(rc: RobotCommander, goals: dict, command_queue: "queue.Queue", status_queue: "queue.Queue"):
-    """Hilo en segundo plano: toda la lógica de ROS/Nav2 vive aquí. La GUI
-    nunca llama directamente a rclpy, solo intercambia datos por colas."""
+    # Hilo secundario donde se ejecuta la lógica de navegación. La interfaz intercambia datos por colas con rclpy
     status_queue.put(('state', 'init', "Inicializando sistema de navegación..."))
 
-    # Punto de origen del robot: se publica como pose inicial de AMCL y se
-    # reutiliza más adelante como punto de retorno tras cada navegación.
+    # Punto de origen del robot
     home_pose = get_home_pose(rc)
     rc.setInitialPose(home_pose.pose)
 
     rc.waitUntilNav2Active()
-
+    
+    
     while rc.is_docked is None:
         rclpy.spin_once(rc, timeout_sec=0.5)
-
+    # Si está en el dock, sacarlo
     if rc.is_docked:
         rc.undock()
 
     status_queue.put(('state', 'ready', "Listo. Elige un aula."))
 
-    # Bucle principal: procesa una petición de la GUI cada vez, y al
-    # terminar vuelve a quedar a la espera de la siguiente selección
+    # Bucle principal que procesa las peticiones de la interfaz y queda a la espera cuando termina
     while rclpy.ok():
         try:
             selected = command_queue.get(timeout=0.5)
@@ -532,8 +529,7 @@ def ros_worker(rc: RobotCommander, goals: dict, command_queue: "queue.Queue", st
 
 
 class RobotGuiaGUI:
-    """Panel de control: botones para elegir aula + estado en vivo + registro."""
-
+    # Configuración del panel de control: botones para elegir aula, estado actual y el registro
     STATE_COLORS = {
         'init':  '#2563eb',   # azul
         'busy':  '#d97706',   # naranja
@@ -637,26 +633,33 @@ class RobotGuiaGUI:
 
 
 def main(args=None):
+
+    # Inicializa el sistema de comunicaciones de ros
     rclpy.init(args=args)
+
     rc = RobotCommander()
     goals = define_goal_poses(rc)
 
+    # Cola para enviar comandos desde la interfaz al hilo de ros
     command_queue = queue.Queue()
     status_queue = queue.Queue()
 
-    # Los mensajes rc.info()/warn()/error() también se vuelcan en el registro de la GUI
+    # Se mandan los info, error y warn a la interfaz
     rc.status_callback = lambda level, msg: status_queue.put(('log', level, msg))
 
+    # Hilo independiente para ejecución de ros
     worker = threading.Thread(
         target=ros_worker, args=(rc, goals, command_queue, status_queue), daemon=True
     )
     worker.start()
 
+    # Creación de la ventana principal de la interfaz gráfica
     root = tk.Tk()
+    # Inicialización de la GUI
     RobotGuiaGUI(root, goals, command_queue, status_queue)
     root.mainloop()
 
-    # Al cerrar la ventana: avisar al hilo ROS y esperar a que termine limpio
+    # Cierre limpio y ordenado de la aplicación
     command_queue.put('SHUTDOWN')
     worker.join(timeout=5.0)
     rc.destroyNode()
