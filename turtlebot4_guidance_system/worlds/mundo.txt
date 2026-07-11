@@ -1,0 +1,8 @@
+cambiar el nombre del mundo al mismo que .sdf
+poner .dae e imagen .png en la misma carpeta
+<world name= >
+
+static poner a true
+
+ros2 launch dis_tutorial3 sim_turtlebot_slam.launch.py world:=mundo_habitaciones
+para hcer slam del nuevo mundo
