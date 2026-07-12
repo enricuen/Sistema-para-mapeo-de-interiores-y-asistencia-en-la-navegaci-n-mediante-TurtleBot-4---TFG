@@ -91,7 +91,7 @@ source ~/ros2_ws/install/setup.bash
 
 ### Ejecución completa
 
-# Terminal 1
+#### Terminal 1
 
 ```bash
 ros2 run rmw_zenoh_cpp rmw_zenohd
