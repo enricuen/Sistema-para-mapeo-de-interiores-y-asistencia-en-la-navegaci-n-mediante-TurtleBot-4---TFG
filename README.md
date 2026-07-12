@@ -114,6 +114,6 @@ Este lanzamiento inicializa automáticamente:
 - La interfaz gráfica del sistema de guiado.
 
   
-###<img width="1848" height="1046" alt="cerradaportada" src="https://github.com/user-attachments/assets/369e1d99-9f74-402a-ab4d-4535b9b05183" />
+<img width="1848" height="1046" alt="cerradaportada" src="https://github.com/user-attachments/assets/369e1d99-9f74-402a-ab4d-4535b9b05183" />
 
 ---
